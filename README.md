@@ -7,15 +7,15 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 ## 🏗️ What I’ve Built So Far
 
 ### 🗺️ 1. Eureka Service Registry
-* **What it does:** Operates on port `8761`. It acts as the registry for our entire system.
+* **What it does:** Operates on port `8761`. It acts as the registry for the entire system.
 * **Why it's cool:** Services don't need to know hardcoded URLs to talk to each other anymore. They register with Eureka, and look each other up dynamically.
 
 ### 🛡️ 2. Spring Cloud Gateway
-* **What it does:** Sits out front on port `8080`. Absolutely no client talks to our backend databases directly; everything flows through the Gateway.
+* **What it does:** Sits out front on port `8080`. Absolutely no client talks to the backend databases directly; everything flows through the Gateway.
 * **Why it's cool:** It parses incoming client JWT tokens, validates them, strips them away, and forwards the clean identity headers (`X-LoggedIn-User`, `X-LoggedIn-Role`) downstream. 
 
 ### 🥷 3. Anti-Spoofing Perimeter Security
-* **The Problem:** If a hacker scans our ports and hits a microservice directly (like hitting the Cart Service on port `8082`), they could type in fake headers like `X-LoggedIn-Role: ROLE_ADMIN` and hijack the system.
+* **The Problem:** If a hacker scans the system's ports and hits a microservice directly (like hitting the Cart Service on port `8082`), they could type in fake headers like `X-LoggedIn-Role: ROLE_ADMIN` and hijack the system.
 * **The Fix:** I built a custom **Zero-Trust Shield**. The Gateway automatically injects a confidential, random `X-Gateway-Secret` string to every request. 
 * **The Result:** Every service verifies this secret first thing in a strict `GatewaySecretFilter`. If a request doesn't have the secret handshake, it gets slapped with a `401 Unauthorized` instantly. Yes, this makes the system **stateful** but in turn makes it very secure.
 
