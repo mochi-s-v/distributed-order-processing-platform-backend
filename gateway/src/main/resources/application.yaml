@@ -1,0 +1,40 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          default-filters:
+            - AddRequestHeader=X-Gateway-Secret, my-super-secret-perimeter-key-2026-vicky
+          routes:
+            - id: user-route
+              uri: lb://USER-SERVICE
+              predicates:
+                  - Path=/api/user/**
+              filters:
+                  - AuthenticationFilter
+
+            - id: product-route
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/api/product/**, /api/category/**
+              filters:
+                - AuthenticationFilter
+
+            - id: cart-route
+              uri: lb://CART-SERVICE
+              predicates:
+                - Path=/api/cart/**
+              filters:
+                - AuthenticationFilter
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true

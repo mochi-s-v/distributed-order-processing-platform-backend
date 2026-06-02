@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: product-service
+  datasource:
+    url: JDBC:mysql://localhost:3306/shopping_microservice_products
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8082
+
+eureka:
+  client:
+    register-with-eureka: true
