@@ -46,3 +46,16 @@ Here is what I'm building next to take this platform to production level:
 * **📊 Prometheus & Grafana:** Real-time production telemetry monitoring JVM health, response times, and system error rates.
 * **🎪 Saga Orchestration:** Distributed transaction engine that auto-rolls back changes across services if a checkout step fails.
 * **🚀 Apache Kafka:** Asynchronous event broker to offload heavy processing (like sending confirmation emails) to background workers.
+
+---
+
+## 🛠️ The Tech Stack
+
+* **Language:** Java 17 / 21
+* **Core Framework:** Spring Boot 3.x
+* **Security:** Spring Security 6.x & JWT
+* **Service Discovery:** Spring Cloud Netflix Eureka
+* **API Gateway:** Spring Cloud Gateway
+* **Inter-Service Communication:** Spring Cloud OpenFeign
+* **Database & ORM:** MySQL & Spring Data JPA (Hibernate)
+* **Boilerplate Reduction:** Lombok
