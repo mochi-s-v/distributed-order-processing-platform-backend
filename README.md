@@ -38,8 +38,11 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 
 Here is what I'm building next to take this platform to production level:
 
-* **📦 The Order Service:** A stateful tracking system that takes runtime carts and locks them into permanent, immutable historical ledgers (`priceAtPurchase`).
-* **⚖️ The Stock Shrinker:** An automated stock subtraction workflow that forces the Order Service to verify and permanently decrement available product catalog counts mid-checkout.
-* **🎪 Saga Orchestration:** If a checkout fails halfway through (e.g., payment fails after stock is deducted), a distributed compensation engine automatically rolls back data changes across services.
-* **🚀 Apache Kafka Streaming:** Dropping heavy synchronous processing loops for lightning-fast asynchronous events (e.g., throwing a `CheckoutEvent` into Kafka so an independent Notification Service can handle emails in the background).
-* **🛡️ Fault Tolerance (Resilience4j Circuit Breaker):** Wrapping our OpenFeign clients inside safety nets. If the Product Service goes down temporarily, the Circuit Breaker trips open, allowing the Cart Service to gracefully return fallback/cached data instead of throwing a massive error page at our users.
+* **📦 Order Service:** Converts transient carts into permanent, immutable historical sales ledgers (`priceAtPurchase`).
+* **⚖️ Stock Shrinker:** Automated workflow to verify and permanently decrement inventory counts mid-checkout.
+* **🛡️ Resilience4j:** Safety nets for Feign clients. Trips open if a service fails, serving cached/fallback data instead of crashing.
+* **🐳 Docker Compose:** Packages all apps and databases so the entire platform boots with a single `docker-compose up`.
+* **🔑 Keycloak OAuth2:** Centralized IAM replacing custom filters with industry-standard Single Sign-On (SSO) and token validation.
+* **📊 Prometheus & Grafana:** Real-time production telemetry monitoring JVM health, response times, and system error rates.
+* **🎪 Saga Orchestration:** Distributed transaction engine that auto-rolls back changes across services if a checkout step fails.
+* **🚀 Apache Kafka:** Asynchronous event broker to offload heavy processing (like sending confirmation emails) to background workers.
