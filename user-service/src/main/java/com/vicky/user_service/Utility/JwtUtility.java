@@ -3,7 +3,6 @@ package com.vicky.user_service.Utility;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -38,10 +37,6 @@ public class JwtUtility {
                 .compact();
     }
 
-    public boolean validateToken(String username, UserDetails userDetails, String token) {
-        return userDetails.getUsername().equals(username) && !isExpired(token);
-    }
-
     private Claims getClaims(String token) {
         return Jwts.parser()
                 .verifyWith(SECRET_KEY)
@@ -50,12 +45,16 @@ public class JwtUtility {
                 .getPayload();
     }
 
-    public String extractUsername(String token) {
-        return getClaims(token).getSubject();
-    }
+//    public boolean validateToken(String username, UserDetails userDetails, String token) {
+//        return userDetails.getUsername().equals(username) && !isExpired(token);
+//    }
 
-    public boolean isExpired(String token) {
-        Claims claim = getClaims(token);
-        return claim.getExpiration().before(new Date());
-    }
+//    public String extractUsername(String token) {
+//        return getClaims(token).getSubject();
+//    }
+//
+//    public boolean isExpired(String token) {
+//        Claims claim = getClaims(token);
+//        return claim.getExpiration().before(new Date());
+//    }
 }

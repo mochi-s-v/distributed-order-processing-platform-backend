@@ -14,7 +14,7 @@ spring:
             - id: user-route
               uri: lb://USER-SERVICE
               predicates:
-                  - Path=/api/user/**
+                  - Path=/api/user/**, /api/address/**
               filters:
                   - AuthenticationFilter
 
@@ -29,6 +29,13 @@ spring:
               uri: lb://CART-SERVICE
               predicates:
                 - Path=/api/cart/**
+              filters:
+                - AuthenticationFilter
+
+            - id: order-route
+              uri: lb://ORDER-SERVICE
+              predicates:
+                  - Path=/api/order/**
               filters:
                 - AuthenticationFilter
 

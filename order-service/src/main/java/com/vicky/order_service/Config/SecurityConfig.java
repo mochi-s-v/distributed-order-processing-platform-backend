@@ -1,17 +1,14 @@
-package com.vicky.product_service.Config;
+package com.vicky.order_service.Config;
 
-import com.vicky.product_service.Filters.GatewayHeaderFilter;
-import com.vicky.product_service.Filters.GatewaySecretFilter;
+import com.vicky.order_service.Filter.GatewayHeaderFilter;
+import com.vicky.order_service.Filter.GatewaySecretFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
 
     private final GatewayHeaderFilter gatewayHeaderFilter;
@@ -27,12 +24,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/internal/**").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/product/**", "/api/category/**").permitAll()
-                        .requestMatchers("/api/product/**", "/api/category/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                );
+                        .anyRequest().authenticated());
         httpSecurity.addFilterBefore(gatewaySecretFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterAfter(gatewayHeaderFilter, GatewaySecretFilter.class);
         return httpSecurity.build();

@@ -1,4 +1,4 @@
-package com.vicky.product_service.Filters;
+package com.vicky.order_service.Filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,8 +17,9 @@ import java.util.List;
 public class GatewayHeaderFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println("=== FILTER 2 ACTIVE ===");
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         String username = request.getHeader("x-loggedin-user");
         String rolesHeader = request.getHeader("X-loggedIn-role");
 

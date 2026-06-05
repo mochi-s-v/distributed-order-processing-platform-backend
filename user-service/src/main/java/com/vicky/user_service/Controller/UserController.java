@@ -7,12 +7,14 @@ import com.vicky.user_service.Dto.ResponseDto.ApiResponse;
 import com.vicky.user_service.Dto.ResponseDto.UserResponseDto;
 import com.vicky.user_service.Utility.JwtUtility;
 import com.vicky.user_service.serviceImpl.UserServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,10 +94,10 @@ public class UserController {
 //    }
 
     @GetMapping("/debug-headers")
-    public ResponseEntity<Map<String, String>> debugHeaders(jakarta.servlet.http.HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> debugHeaders(HttpServletRequest request) {
         Map<String, String> headers = new HashMap<>();
 
-        java.util.Enumeration<String> headerNames = request.getHeaderNames();
+        Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
             headers.put(headerName, request.getHeader(headerName));
