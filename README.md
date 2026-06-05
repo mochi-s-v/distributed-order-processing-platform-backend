@@ -40,7 +40,14 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 ---
 
 ## 📊 The Blueprint
+
 <img width="1516" height="1249" alt="Screenshot 2026-06-03 015344" src="https://github.com/user-attachments/assets/f6ab2848-cd3f-49e6-a6ae-d5a15071210e" />
+
+---
+
+## 🔗 APIs
+
+<img width="1054" height="545" alt="image (2)" src="https://github.com/user-attachments/assets/d0363437-5e1b-4a2d-8442-8027ab4f5d87" />
 
 ---
 
