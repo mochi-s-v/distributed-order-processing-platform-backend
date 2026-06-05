@@ -27,12 +27,12 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 * **The Solution:** When the Cart Service needs live product prices or stock data from the Product Service, it uses declarative **OpenFeign** clients.
 * **The Security:** I wrote a custom `RequestInterceptor` that automatically grabs the active security token and the secret handshake key, attaching them to outbound Feign templates so downstream services don't block the call.
 
-#### 📦 6. Order Service & Historical Sales Ledger
+### 📦 6. Order Service & Historical Sales Ledger
 * **The Problem:** Shopping carts are transient and dynamic. If a product's price or name changes in the future, past transaction records inside an old checkout could get corrupted or alter financial logs.
 * **The Fix:** Created an immutable sales ledger system. The `ORDER-SERVICE` captures the checkout snapshot and maps elements into an explicit parent-child relational tree (`OrderEntity` $\rightarrow$ `OrderItemsEntity`) using a strict `CascadeType.ALL` lifecycle persistence strategy.
 * **The Result:** Converts temporary shopping cart items into a permanent, unalterable historical sales record, securely baking in the exact `priceAtPurchase` state.
 
-#### ⚖️ 7. Automated Stock Shrinker Logic
+### ⚖️ 7. Automated Stock Shrinker Logic
 * **The Problem:** Race conditions could allow multiple checkouts to over-purchase an item, dropping inventory below zero.
 * **The Fix:** I designed a high-integrity, transactional inventory deduction sequence inside the `PRODUCT-SERVICE`.
 * **The Result:** The system explicitly checks real-time available stock against incoming requested values. If the item count is sufficient, it precisely decrements the balance (safeguarding against dropping stock to 0 on small purchases). If inventory is short, an error cascades back over the network layer via Feign exception bubbles to gracefully block and roll back the entire transaction.
