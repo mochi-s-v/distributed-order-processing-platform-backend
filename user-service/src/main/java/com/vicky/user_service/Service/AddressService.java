@@ -9,4 +9,6 @@ public interface AddressService {
     public List<AddressResponseDto> addAddress(AddressRequestDto addressRequestDto);
     public List<AddressResponseDto> deleteAddress(long addressId);
     public List<AddressResponseDto> getAddress();
+    public boolean getAddressByIdValid(long addressId);
+    public AddressResponseDto getAddressById(long addressId);
 }

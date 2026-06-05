@@ -2,6 +2,7 @@ package com.vicky.product_service.Service;
 
 
 import com.vicky.product_service.Dto.RequestDto.ProductRequestDto;
+import com.vicky.product_service.Dto.RequestDto.StockDeductRequestDto;
 import com.vicky.product_service.Dto.ResponseDto.ProductResponseDto;
 
 import java.util.List;
@@ -17,4 +18,5 @@ public interface ProductService {
     public ProductResponseDto createProduct(ProductRequestDto productRequestDto);
     public ProductResponseDto updateProduct(long id, ProductRequestDto productRequestDto);
     public void deleteProduct(long id);
+    public void deduceQuantity(List<StockDeductRequestDto> stockDeductRequestDtoList);
 }

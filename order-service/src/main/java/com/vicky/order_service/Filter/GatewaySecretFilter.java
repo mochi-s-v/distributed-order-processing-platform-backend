@@ -1,4 +1,4 @@
-package com.vicky.product_service.Filters;
+package com.vicky.order_service.Filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,16 +13,13 @@ import java.io.IOException;
 @Component
 public class GatewaySecretFilter extends OncePerRequestFilter {
 
-
-
     @Value("${gateway.shared.secret}")
     private String expectedSecret;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String secret = request.getHeader("X-Gateway-Secret");
-        System.out.println("=== FILTER 1 ACTIVE ===");
-        System.out.println("Received Secret Header: " + secret);
+
         if (secret == null || !secret.equals(expectedSecret)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");

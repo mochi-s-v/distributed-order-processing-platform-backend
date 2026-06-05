@@ -38,7 +38,6 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponseDto addItemToCart(CartRequestDto cartRequestDto) {
-        System.out.println("inside addItemToCart service...error might be within the feignclient");
         CartEntity cart = cartRepository.findByUsername(GetAttributesFromHeader.getAuthUsername())
                 .orElseGet(() -> {
                     CartEntity newCart = new CartEntity();
@@ -49,6 +48,7 @@ public class CartServiceImpl implements CartService {
 
         ApiResponse<ProductResponseDto> response = productClient.getProduct(cartRequestDto.getProductId());
         ProductResponseDto product = response.getData();
+        System.out.println(product.toString());
 
         CartItemEntity cartItem = cartItemsRepository
                 .findByCartEntity_IdAndProductId(cart.getId(), product.getId())
@@ -103,7 +103,6 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponseDto getCart() {
-        System.out.println(GetAttributesFromHeader.getAuthUsername());
         CartEntity cart = cartRepository.findByUsername(GetAttributesFromHeader.getAuthUsername())
                 .orElseThrow(() -> new RuntimeException("Cart not found for user"));
         return cartMapper.toDto(cart);
@@ -116,11 +115,14 @@ public class CartServiceImpl implements CartService {
         CartEntity cart = cartRepository.findByUsername(GetAttributesFromHeader.getAuthUsername())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
+
         CartItemEntity item = cartItemsRepository
                 .findByCartEntity_IdAndProductId(cart.getId(), productId)
                 .orElseThrow(() -> new RuntimeException("Item not found in cart"));
 
+        cart.getCartItems().remove(item);
         cartItemsRepository.delete(item);
+
         return getCart();
     }
 

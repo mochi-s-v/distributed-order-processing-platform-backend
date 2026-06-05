@@ -64,4 +64,26 @@ public class AddressServiceImpl implements AddressService {
                 .map(address -> AddressMapper.toDto(address))
                 .toList();
     }
+
+    @Override
+    public boolean getAddressByIdValid(long addressId) {
+        UserEntity userEntity = userRepository.findByUsername(GetAuthenticatedUser.getAuthUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        AddressEntity addressEntity = addressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+        return userEntity.getAddressEntityList().contains(addressEntity);
+    }
+
+    @Override
+    public AddressResponseDto getAddressById(long addressId) {
+        UserEntity userEntity = userRepository.findByUsername(GetAuthenticatedUser.getAuthUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        AddressEntity addressEntity = addressRepository.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+        if (userEntity.getAddressEntityList().contains(addressEntity)) {
+            return AddressMapper.toDto(addressEntity);
+        } else {
+            throw new RuntimeException("access denied");
+        }
+    }
 }

@@ -42,10 +42,10 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(updatedCart, "Item removed from cart", 200));
     }
 
-    @PutMapping("/update/{productId}/{quantity}")
+    @PutMapping("/update")
     public ResponseEntity<ApiResponse<CartResponseDto>> updateQuantity(
-            @PathVariable long productId,
-            @PathVariable int quantity) {
+            @RequestParam long productId,
+            @RequestParam int quantity) {
         CartResponseDto result = cartService.updateItemQuantity(productId, quantity);
         return ResponseEntity.ok(ApiResponse.success(result, "Quantity updated", 200));
     }

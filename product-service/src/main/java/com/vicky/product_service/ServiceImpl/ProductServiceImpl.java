@@ -2,6 +2,7 @@ package com.vicky.product_service.ServiceImpl;
 
 
 import com.vicky.product_service.Dto.RequestDto.ProductRequestDto;
+import com.vicky.product_service.Dto.RequestDto.StockDeductRequestDto;
 import com.vicky.product_service.Dto.ResponseDto.ProductResponseDto;
 import com.vicky.product_service.Entity.CategoryEntity;
 import com.vicky.product_service.Entity.ProductEntity;
@@ -90,5 +91,22 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("no product found"));
         productEntity.setActive(false);
         productRepository.save(productEntity);
+    }
+
+    @Override
+    @Transactional
+    public void deduceQuantity(List<StockDeductRequestDto> stockDeductRequestDtoList) {
+        stockDeductRequestDtoList.forEach(
+                request -> {
+                    ProductEntity productEntity = productRepository.findById(request.getProductId())
+                            .orElseThrow(() -> new RuntimeException("no product found"));
+
+                    if (productEntity.getQuantity() < request.getQuantity()) {
+                        throw new RuntimeException("Insufficient stock for product: " + productEntity.getName());
+                    }
+
+                    productEntity.setQuantity(productEntity.getQuantity() - request.getQuantity());
+                    productRepository.save(productEntity);
+                });
     }
 }

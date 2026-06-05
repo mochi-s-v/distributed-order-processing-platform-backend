@@ -4,19 +4,19 @@ package com.vicky.product_service.Controller;
 import com.vicky.product_service.Dto.RequestDto.ProductRequestDto;
 import com.vicky.product_service.Dto.ResponseDto.ApiResponse;
 import com.vicky.product_service.Dto.ResponseDto.ProductResponseDto;
-import com.vicky.product_service.ServiceImpl.ProductServiceImpl;
+import com.vicky.product_service.Service.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/product")
+@RequestMapping("/api/product")
 public class ProductController {
 
-    private final ProductServiceImpl productService;
+    private final ProductService productService;
 
-    public ProductController(ProductServiceImpl productService) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
     }
 

@@ -1,4 +1,4 @@
-package com.vicky.cart_service.Dto.ResponseDto;
+package com.vicky.order_service.Dto.ResponseDto;
 
 import lombok.*;
 
@@ -6,10 +6,9 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class ProductResponseDto {
     private long id;
     private String name;
     private double price;
-    private int quantity;
+    private int stockQuantity;
 }
