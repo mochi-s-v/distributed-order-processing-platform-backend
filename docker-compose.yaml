@@ -1,0 +1,137 @@
+services:
+  eureka-service-registry:
+    build: ./Eureka-service-registry
+    container_name: shoppingMicroservice-eureka-service-registry
+    ports:
+      - "8761:8761"
+    networks:
+      - shopping-network
+
+  api-gateway:
+    build: ./gateway
+    container_name: shoppingMicroservice-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+    depends_on:
+      - eureka-service-registry
+    networks:
+      - shopping-network
+
+  user-service:
+    build: ./user-service
+    container_name: shoppingMicroservice-user-service
+    environment:
+      EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+      SPRING_DATASOURCE_URL: JDBC:mysql://user-db:3306/shopping_microservice_users
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+    depends_on:
+      - user-db
+      - eureka-service-registry
+    networks:
+      - shopping-network
+
+  product-service:
+    build: ./product-service
+    container_name: shoppingMicroservice-product-service
+    environment:
+      EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+      SPRING_DATASOURCE_URL: JDBC:mysql://product-db:3306/shopping_microservice_products
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+    depends_on:
+      - product-db
+      - eureka-service-registry
+    networks:
+      - shopping-network
+
+  cart-service:
+    build: ./cart-service
+    container_name: shoppingMicroservice-cart-service
+    environment:
+      EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+      SPRING_DATASOURCE_URL: JDBC:mysql://cart-db:3306/shopping_microservice_cart
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+    depends_on:
+      - cart-db
+      - eureka-service-registry
+    networks:
+      - shopping-network
+
+  order-service:
+    build: ./order-service
+    container_name: shoppingMicroservice-order-service
+    environment:
+      EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+      SPRING_DATASOURCE_URL: JDBC:mysql://order-db:3306/shopping_microservice_orders
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+    depends_on:
+      - order-db
+      - eureka-service-registry
+    networks:
+      - shopping-network
+
+  user-db:
+    image: mysql:latest
+    container_name: shoppingMicroservice-user-db
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: shopping_microservice_users
+    ports:
+      - "3306:3306"
+    volumes:
+      - user-db-volume:/var/lib/mysql
+    networks:
+      - shopping-network
+
+  product-db:
+    image: mysql:latest
+    container_name: shoppingMicroservice-product-db
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: shopping_microservice_products
+    ports:
+      - "3307:3306"
+    volumes:
+      - product-db-volume:/var/lib/mysql
+    networks:
+      - shopping-network
+
+  cart-db:
+    image: mysql:latest
+    container_name: shoppingMicroservice-cart-db
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: shopping_microservice_cart
+    ports:
+      - "3308:3306"
+    volumes:
+      - cart-db-volume:/var/lib/mysql
+    networks:
+      - shopping-network
+
+  order-db:
+    image: mysql:latest
+    container_name: shoppingMicroservice-order-db
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: shopping_microservice_orders
+    ports:
+      - "3309:3306"
+    volumes:
+      - order-db-volume:/var/lib/mysql
+    networks:
+      - shopping-network
+
+networks:
+  shopping-network:
+
+volumes:
+  user-db-volume:
+  product-db-volume:
+  cart-db-volume:
+  order-db-volume:

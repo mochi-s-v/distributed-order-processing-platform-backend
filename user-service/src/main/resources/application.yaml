@@ -2,9 +2,9 @@ spring:
   application:
     name: user-service
   datasource:
-    url: JDBC:mysql://localhost:3306/shopping_microservice_users
-    username: root
-    password:
+    url: ${SPRING_DATASOURCE_URL:JDBC:mysql://localhost:3306/shopping_microservice_users}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -17,5 +17,9 @@ server:
 
 eureka:
   client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
     register-with-eureka: true
-#    fetch-registry: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
