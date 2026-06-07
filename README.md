@@ -36,12 +36,33 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 * **The Problem:** Race conditions could allow multiple checkouts to over-purchase an item, dropping inventory below zero.
 * **The Fix:** I designed a high-integrity, transactional inventory deduction sequence inside the `PRODUCT-SERVICE`.
 * **The Result:** The system explicitly checks real-time available stock against incoming requested values. If the item count is sufficient, it precisely decrements the balance (safeguarding against dropping stock to 0 on small purchases). If inventory is short, an error cascades back over the network layer via Feign exception bubbles to gracefully block and roll back the entire transaction.
-  
+
+### 🐳 8. Dockerized Infrastructure
+The Problem: Running multiple microservices and databases manually requires starting each application separately and managing networking configurations by hand.
+The Fix: I Containerized every microservice using custom Dockerfiles and orchestrated the entire ecosystem with Docker Compose.
+The Result: The complete platform—including Eureka, API Gateway, all microservices, and databases can now be launched with a single command.
+
 ---
 
 ## 📊 The Blueprint
 
 <img width="1516" height="1249" alt="Screenshot 2026-06-03 015344" src="https://github.com/user-attachments/assets/f6ab2848-cd3f-49e6-a6ae-d5a15071210e" />
+
+---
+
+## 🐳 Running with Docker
+```
+# Build and start all services
+docker-compose up --build
+
+# Run in detached mode
+docker-compose up -d
+
+# Stop everything
+docker-compose down
+```
+
+<img width="1438" height="400" alt="image" src="https://github.com/user-attachments/assets/6834aac4-7240-4d0b-8472-89683e1fd706" />
 
 ---
 
@@ -57,7 +78,6 @@ Here is what I'm building next to take this platform to production level:
 
 * **💰 Payment Service:** A microservice responsible for processing payments during checkout. Once the payment is successfully completed, the checkout process is finalized.
 * **🚀 Apache Kafka:** Asynchronous event broker to offload heavy processing (like sending confirmation emails) to background workers.
-* **🐳 Docker Compose:** Packages all apps and databases so the entire platform boots with a single `docker-compose up`.
 * **🔑 Keycloak OAuth2:** Centralized IAM replacing custom filters with industry-standard Single Sign-On (SSO) and token validation.
 * **🎪 Saga Orchestration:** Distributed transaction engine that auto-rolls back changes across services if a checkout step fails.
 * **📊 Prometheus & Grafana:** Real-time production telemetry monitoring JVM health, response times, and system error rates.
@@ -74,4 +94,5 @@ Here is what I'm building next to take this platform to production level:
 * **API Gateway:** Spring Cloud Gateway
 * **Inter-Service Communication:** Spring Cloud OpenFeign
 * **Database & ORM:** MySQL & Spring Data JPA (Hibernate)
+* **Containerization:** Docker & Docker Compose
 * **Boilerplate Reduction:** Lombok
