@@ -38,9 +38,23 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 * **The Result:** The system explicitly checks real-time available stock against incoming requested values. If the item count is sufficient, it precisely decrements the balance (safeguarding against dropping stock to 0 on small purchases). If inventory is short, an error cascades back over the network layer via Feign exception bubbles to gracefully block and roll back the entire transaction.
 
 ### 🐳 8. Dockerized Infrastructure
-The Problem: Running multiple microservices and databases manually requires starting each application separately and managing networking configurations by hand.
-The Fix: I Containerized every microservice using custom Dockerfiles and orchestrated the entire ecosystem with Docker Compose.
-The Result: The complete platform—including Eureka, API Gateway, all microservices, and databases can now be launched with a single command.
+* **The Problem:** Running multiple microservices and databases manually requires starting each application separately and managing networking configurations by hand.
+* **The Fix:** I Containerized every microservice using Docker and orchestrated the entire platform with Docker Compose.
+* **The Optimization:** I also Implemented multi-stage Docker builds for every service. Maven and build dependencies exist only in the temporary build stage, while the final runtime image contains only the compiled JAR and JDK runtime.
+* **The Result:** Lean container images, faster deployments and cleaner production ready services which can be initiated with a single command.
+
+```
+  Build Stage
+├── Maven
+├── Source Code
+├── Dependencies
+└── Generates JAR
+          │
+          ▼
+Runtime Stage
+├── JDK
+└── Application JAR
+```
 
 ---
 
@@ -94,5 +108,5 @@ Here is what I'm building next to take this platform to production level:
 * **API Gateway:** Spring Cloud Gateway
 * **Inter-Service Communication:** Spring Cloud OpenFeign
 * **Database & ORM:** MySQL & Spring Data JPA (Hibernate)
-* **Containerization:** Docker & Docker Compose
+* **Devops:** Docker, Docker Compose, Multi-stage Docker Builds
 * **Boilerplate Reduction:** Lombok
