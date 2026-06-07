@@ -44,7 +44,7 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 * **The Result:** Lean container images, faster deployments and cleaner production ready services which can be initiated with a single command.
 
 ```
-  Build Stage
+Build Stage
 ├── Maven
 ├── Source Code
 ├── Dependencies
@@ -66,11 +66,8 @@ Runtime Stage
 
 ## 🐳 Running with Docker
 ```
-# Build and start all services
-docker-compose up --build
-
-# Run in detached mode
-docker-compose up -d
+# Build and start all services in detached mode
+docker-compose up --build --detach
 
 # Stop everything
 docker-compose down
