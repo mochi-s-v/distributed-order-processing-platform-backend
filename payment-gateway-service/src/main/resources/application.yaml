@@ -1,3 +1,29 @@
 spring:
   application:
     name: payment-gateway-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:JDBC:mysql://localhost:3306/shopping_microservice_payments}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+server:
+  port: 8085
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+stripe:
+  secret-key:<your api key here>
+  client-url: http://localhost:8080
