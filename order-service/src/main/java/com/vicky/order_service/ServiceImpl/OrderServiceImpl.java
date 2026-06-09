@@ -2,11 +2,14 @@ package com.vicky.order_service.ServiceImpl;
 
 
 import com.vicky.order_service.Client.CartClient;
+import com.vicky.order_service.Client.PaymentClient;
 import com.vicky.order_service.Client.ProductClient;
 import com.vicky.order_service.Client.UserClient;
+import com.vicky.order_service.Dto.RequestDto.PaymentRequest;
 import com.vicky.order_service.Dto.RequestDto.StockDeductRequestDto;
 import com.vicky.order_service.Dto.ResponseDto.CartResponseDto;
 import com.vicky.order_service.Dto.ResponseDto.OrderResponseDto;
+import com.vicky.order_service.Dto.ResponseDto.PaymentResponse;
 import com.vicky.order_service.Entity.OrderEntity;
 import com.vicky.order_service.Entity.OrderItemsEntity;
 import com.vicky.order_service.Mapper.OrderMapper;
@@ -15,6 +18,8 @@ import com.vicky.order_service.Service.OrderService;
 import com.vicky.order_service.Utility.GetAttributesFromHeader;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,22 +33,25 @@ public class OrderServiceImpl implements OrderService {
     private final CartClient cartClient;
     private final ProductClient productClient;
     private final OrderMapper orderMapper;
+    private final PaymentClient paymentClient;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             UserClient userClient,
                             CartClient cartClient,
                             ProductClient productClient,
-                            OrderMapper orderMapper) {
+                            OrderMapper orderMapper,
+                            PaymentClient paymentClient) {
         this.orderRepository = orderRepository;
         this.userClient = userClient;
         this.cartClient = cartClient;
         this.productClient = productClient;
         this.orderMapper = orderMapper;
+        this.paymentClient = paymentClient;
     }
 
     @Override
     @Transactional
-    public OrderResponseDto checkout(long addressId) {
+    public String checkout(long addressId) {
         CartResponseDto cartDto = cartClient.getCart().getData();
         if (cartDto.getItems().isEmpty()) {
             throw new RuntimeException("Cannot checkout an empty cart");
@@ -76,6 +84,24 @@ public class OrderServiceImpl implements OrderService {
                 }).collect(Collectors.toList());
         order.setOrderItems(orderItems);
 
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        BigDecimal amountInCents = BigDecimal.valueOf(savedOrder.getTotalAmount() * 100);
+
+        PaymentRequest paymentRequest = PaymentRequest.builder()
+                .orderId(savedOrder.getId())
+                .amount(amountInCents)
+                .currency("inr")
+                .customerEmail(GetAttributesFromHeader.getAuthUsername() + "@example.com")
+                .build();
+
+        PaymentResponse paymentResponse;
+        try {
+            paymentResponse = paymentClient.initiateCheckout(paymentRequest).getData();
+        } catch (Exception e) {
+            throw new RuntimeException("Payment service is temporarily unavailable. Try again shortly.");
+        }
+
         List<StockDeductRequestDto> stockDeductRequests = cartDto.getItems().stream()
                 .map(item -> new StockDeductRequestDto(item.getProductId(), item.getQuantity()))
                 .collect(Collectors.toList());
@@ -88,9 +114,7 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Checkout failed: Product service is currently unreachable.");
         }
 
-        orderRepository.save(order);
-        cartClient.clearCart();
-        return orderMapper.toDto(order);
+        return paymentResponse.getPaymentSessionUrl();
     }
 
     @Override

@@ -6,7 +6,9 @@ import com.vicky.order_service.Service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/order")
@@ -19,9 +21,15 @@ public class OrderController {
     }
 
     @PostMapping("/checkout")
-    public ResponseEntity<ApiResponse<OrderResponseDto>> checkout(@RequestParam long addressId) {
-        OrderResponseDto response = orderService.checkout(addressId);
-        return ResponseEntity.ok(ApiResponse.success(response, "Order placed successfully", 201));
+    public ResponseEntity<ApiResponse<Map<String, String>>> checkout(@RequestParam long addressId) {
+        String stripeCheckoutUrl = orderService.checkout(addressId);
+        Map<String, String> responseData = new HashMap<>();
+        responseData.put("checkoutUrl", stripeCheckoutUrl);
+        return ResponseEntity.ok(ApiResponse.success(
+                responseData,
+                "Order initiated successfully. Please complete payment using the link.",
+                201
+        ));
     }
 
     @GetMapping("/{orderId}")
