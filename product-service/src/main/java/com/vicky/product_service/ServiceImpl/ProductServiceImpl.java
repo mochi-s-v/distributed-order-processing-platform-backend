@@ -104,6 +104,7 @@ public class ProductServiceImpl implements ProductService {
                     if (productEntity.getQuantity() < request.getQuantity()) {
                         throw new RuntimeException("Insufficient stock for product: " + productEntity.getName());
                     }
+                    System.out.println("im in deduce quantity service impl");
 
                     productEntity.setQuantity(productEntity.getQuantity() - request.getQuantity());
                     productRepository.save(productEntity);
