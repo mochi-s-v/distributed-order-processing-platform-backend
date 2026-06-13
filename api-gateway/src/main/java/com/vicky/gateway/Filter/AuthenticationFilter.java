@@ -24,9 +24,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     public static class Config {
     }
 
-    @Value("${gateway.shared.secret}")
-    private String sharedSecret;
-
     @Override
     public GatewayFilter apply(AuthenticationFilter.Config config) {
         return (exchange, chain) -> {

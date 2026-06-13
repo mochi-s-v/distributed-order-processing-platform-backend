@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
-    @Value("${stripe.secret-key}")
+    @Value("${stripe.secret.key}")
     private String stripeSecretKey;
 
-    @Value("${stripe.client-url}")
+    @Value("${stripe.client.url}")
     private String clientUrl;
 
 
@@ -34,6 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .setSuccessUrl(clientUrl + "/payment/success?orderId=" + request.getOrderId())
                 .setCancelUrl(clientUrl + "/payment/cancel?orderId=" + request.getOrderId())
                 .setCustomerEmail(request.getCustomerEmail())
+                .putMetadata("orderId", request.getOrderId())
                 .addLineItem(SessionCreateParams.LineItem.builder()
                                 .setQuantity(1L)
                                 .setPriceData(SessionCreateParams.LineItem.PriceData.builder()

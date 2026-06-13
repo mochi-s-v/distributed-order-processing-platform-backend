@@ -8,14 +8,17 @@ services:
       - shopping-network
 
   api-gateway:
-    build: ./gateway
+    build: ./api-gateway
     container_name: shoppingMicroservice-api-gateway
     ports:
       - "8080:8080"
     environment:
       EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+      SPRING_GATEWAY_SECRET: ${SPRING_GATEWAY_SECRET}
+      JWT_SIGNIN_KEY: ${JWT_SIGNIN_KEY}
     depends_on:
-      - eureka-service-registry
+      eureka-service-registry:
+        condition: service_started
     networks:
       - shopping-network
 
@@ -26,10 +29,14 @@ services:
       EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
       SPRING_DATASOURCE_URL: JDBC:mysql://user-db:3306/shopping_microservice_users
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_GATEWAY_SECRET: ${SPRING_GATEWAY_SECRET}
+      JWT_SIGNIN_KEY: ${JWT_SIGNIN_KEY}
     depends_on:
-      - user-db
-      - eureka-service-registry
+      user-db:
+        condition: service_healthy
+      eureka-service-registry:
+        condition: service_started
     networks:
       - shopping-network
 
@@ -40,10 +47,13 @@ services:
       EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
       SPRING_DATASOURCE_URL: JDBC:mysql://product-db:3306/shopping_microservice_products
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_GATEWAY_SECRET: ${SPRING_GATEWAY_SECRET}
     depends_on:
-      - product-db
-      - eureka-service-registry
+      product-db:
+        condition: service_healthy
+      eureka-service-registry:
+        condition: service_started
     networks:
       - shopping-network
 
@@ -54,10 +64,13 @@ services:
       EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
       SPRING_DATASOURCE_URL: JDBC:mysql://cart-db:3306/shopping_microservice_cart
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_GATEWAY_SECRET: ${SPRING_GATEWAY_SECRET}
     depends_on:
-      - cart-db
-      - eureka-service-registry
+      cart-db:
+        condition: service_healthy
+      eureka-service-registry:
+        condition: service_started
     networks:
       - shopping-network
 
@@ -68,10 +81,45 @@ services:
       EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
       SPRING_DATASOURCE_URL: JDBC:mysql://order-db:3306/shopping_microservice_orders
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: my-secret-pw
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_GATEWAY_SECRET: ${SPRING_GATEWAY_SECRET}
     depends_on:
-      - order-db
-      - eureka-service-registry
+      order-db:
+        condition: service_healthy
+      eureka-service-registry:
+        condition: service_started
+    networks:
+      - shopping-network
+
+  payment-gateway-service:
+    build: ./payment-gateway-service
+    container_name: shoppingMicroservice-payment-gateway-service
+    environment:
+      EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+      SPRING_DATASOURCE_URL: JDBC:mysql://payment-db:3306/shopping_microservice_payments
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_GATEWAY_SECRET: ${SPRING_GATEWAY_SECRET}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_KEY: ${STRIPE_WEBHOOK_KEY}
+    depends_on:
+      payment-db:
+        condition: service_healthy
+      eureka-service-registry:
+        condition: service_started
+    networks:
+      - shopping-network
+
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    command: listen --forward-to http://payment-gateway-service:8085/webhook/stripe
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY}
+    volumes:
+      - ~/.config/stripe:/root/.config/stripe
+    depends_on:
+      payment-gateway-service:
+        condition: service_started
     networks:
       - shopping-network
 
@@ -79,10 +127,16 @@ services:
     image: mysql:latest
     container_name: shoppingMicroservice-user-db
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       MYSQL_DATABASE: shopping_microservice_users
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SPRING_DATASOURCE_PASSWORD}"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - user-db-volume:/var/lib/mysql
     networks:
@@ -92,10 +146,16 @@ services:
     image: mysql:latest
     container_name: shoppingMicroservice-product-db
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       MYSQL_DATABASE: shopping_microservice_products
     ports:
       - "3307:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SPRING_DATASOURCE_PASSWORD}" ]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - product-db-volume:/var/lib/mysql
     networks:
@@ -105,10 +165,16 @@ services:
     image: mysql:latest
     container_name: shoppingMicroservice-cart-db
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       MYSQL_DATABASE: shopping_microservice_cart
     ports:
       - "3308:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SPRING_DATASOURCE_PASSWORD}" ]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - cart-db-volume:/var/lib/mysql
     networks:
@@ -118,12 +184,37 @@ services:
     image: mysql:latest
     container_name: shoppingMicroservice-order-db
     environment:
-      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       MYSQL_DATABASE: shopping_microservice_orders
     ports:
       - "3309:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SPRING_DATASOURCE_PASSWORD}" ]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
       - order-db-volume:/var/lib/mysql
+    networks:
+      - shopping-network
+
+  payment-db:
+    image: mysql:latest
+    container_name: shoppingMicroservice-payment-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      MYSQL_DATABASE: shopping_microservice_payments
+    ports:
+      - "3310:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SPRING_DATASOURCE_PASSWORD}" ]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - payment-db-volume:/var/lib/mysql
     networks:
       - shopping-network
 
@@ -135,3 +226,4 @@ volumes:
   product-db-volume:
   cart-db-volume:
   order-db-volume:
+  payment-db-volume:

@@ -1,4 +1,4 @@
-package com.vicky.product_service.Filters;
+package com.vicky.payment_gateway_service.Filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,14 +13,17 @@ import java.io.IOException;
 @Component
 public class GatewaySecretFilter extends OncePerRequestFilter {
 
-
-
     @Value("${gateway.shared.secret}")
     private String expectedSecret;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        if (request.getRequestURI().equals("/webhook/stripe")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         String secret = request.getHeader("X-Gateway-Secret");
+
         if (secret == null || !secret.equals(expectedSecret)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
