@@ -24,6 +24,3 @@ eureka:
   instance:
     prefer-ip-address: true
 
-stripe:
-  secret-key: ${STRIPE_SECRET_KEY}
-  client-url: http://localhost:8080

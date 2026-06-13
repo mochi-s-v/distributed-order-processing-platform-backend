@@ -3,6 +3,8 @@ package com.vicky.gateway.Utility;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -11,8 +13,17 @@ import java.util.List;
 
 @Component
 public class JwtUtility {
-    private final String SECRET = "my-super-secret-key-that-is-long-enough-1234567890!@#$";
-    private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
+
+    @Value("${jwt.secret.key}")
+    private String SECRET;
+
+    private SecretKey SECRET_KEY;
+
+    @PostConstruct
+    public void init() {
+        this.SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
+    }
+
 
     private Claims getClaims(String token) {
         return Jwts.parser()

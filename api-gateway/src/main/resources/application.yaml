@@ -9,7 +9,7 @@ spring:
       server:
         webflux:
           default-filters:
-            - AddRequestHeader=X-Gateway-Secret, my-super-secret-perimeter-key-2026-vicky
+            - AddRequestHeader=X-Gateway-Secret, ${gateway.shared.secret}
           routes:
             - id: user-route
               uri: lb://USER-SERVICE
