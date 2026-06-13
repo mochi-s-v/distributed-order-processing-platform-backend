@@ -37,6 +37,11 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 * **The Fix:** I Integrated the system with the Stripe payment gateway. The Payment Service creates payment intents, handles transaction processing, and validates successful payments before allowing checkout completion.
 * **The Result:** Orders are finalized only after successful payment authorization, ensuring that unpaid checkouts cannot be converted into completed purchases.
 
+### 8. Stripe webhook & Stripe cli
+* **The problem:** After the payment url is sent to the user, There's no way for the system to know if the payment has been a success or a failure.
+* **The Fix:** By taking advantage of the stripe webhook events and stripe cli. Every payment sends a response back to the system.
+* **The Result:** When ever the payment url is sent to the user, the Stripe cli waits for response and when the stripe server sends a response to the system, I check for `checkout.session.completed`, `payment_intent.payment_failed` and trigger events accordingly.
+
 ### 8. Automated Stock Shrinker Logic
 * **The Problem:** Race conditions could allow multiple checkouts to over-purchase an item, dropping inventory below zero.
 * **The Fix:** I designed a high-integrity, transactional inventory deduction sequence inside the `PRODUCT-SERVICE`.
@@ -46,7 +51,8 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 * **The Problem:** Running multiple microservices and databases manually requires starting each application separately and managing networking configurations by hand.
 * **The Fix:** I Containerized every microservice using Docker and orchestrated the entire platform with Docker Compose.
 * **The Optimization:** I also Implemented multi-stage Docker builds for every service. Maven and build dependencies exist only in the temporary build stage, while the final runtime image contains only the compiled JAR and JDK runtime.
-* **The Result:** Lean container images, faster deployments and cleaner production ready services which can be initiated with a single command.
+* **The Optimization:** Also Implemented MySQL healthchecks with a start_period grace window. Dependent services only start after their database is confirmed ready to accept connections, eliminating startup race conditions.
+* **The Result:** Lean container images, faster deployments and cleaner production ready services which can be initiated with a single command that also avoid race conditions.
 
 ```
 Build Stage
@@ -61,11 +67,38 @@ Runtime Stage
 └── Application JAR
 ```
 
+### 10. Automated Dev Data Seeding
+* **The Problem:** Every fresh environment needs baseline data to be testable — an admin account, a default user, product categories, and inventory.
+* **The Fix:** I Implemented CommandLineRunner seeders across services. On every startup, the system checks and creates an admin account, a default user (jane) with an address, 3 product categories, and 5 products if they don't already exist.
+* **The Result:** A completely fresh `docker compose up` gives you a fully populated, immediately testable environment with zero manual setup. Product stock is also restocked to 10 units on every restart, making repeated checkout testing seamless without manual DB resets.
+
 ---
 
 ## The Blueprint
 
 <img width="1516" height="1249" alt="Screenshot 2026-06-03 015344" src="https://github.com/user-attachments/assets/f6ab2848-cd3f-49e6-a6ae-d5a15071210e" />
+
+---
+
+## Pre requisites
+
+1. Create a stripe test account
+2. Create a .env file and use the .env.example file to create environment variables
+3. There are 5 environment variables :
+```
+# Stripe
+STRIPE_SECRET_KEY="your stripe secret key"
+STRIPE_WEBHOOK_KEY="your stripe webhook key"
+
+# Databases
+SPRING_DATASOURCE_PASSWORD="your docker mysql password (default one : my-secret-pw)"
+
+# Gateway
+SPRING_GATEWAY_SECRET="your gateway secret key"
+
+#JWT
+JWT_SIGNIN_KEY="your jwt sign in key"
+```
 
 ---
 
@@ -92,7 +125,6 @@ docker-compose down
 
 Here is what I'm building next to take this platform to production level:
 
-* **Stripe Webhooks:** Implement webhook based payment confirmation and event handling for a more reliable checkout workflow which will trigger the stock shrinker and notification service.
 * **Apache Kafka:** Asynchronous event broker to offload heavy processing (like sending confirmation emails) to background workers.
 * **Keycloak OAuth2:** Centralized IAM replacing custom filters with industry-standard Single Sign-On (SSO) and token validation.
 * **Saga Orchestration:** Distributed transaction engine that auto-rolls back changes across services if a checkout step fails.
@@ -108,7 +140,7 @@ Here is what I'm building next to take this platform to production level:
 * **Security:** Spring Security 6.x & JWT
 * **Service Discovery:** Spring Cloud Netflix Eureka
 * **API Gateway:** Spring Cloud Gateway
-* **Payment Gateway:** Stripe Payment Gateway
+* **Payment Gateway:** Stripe Payment Gateway, Stripe CLI, Stripe Webhooks
 * **Inter-Service Communication:** Spring Cloud OpenFeign
 * **Database & ORM:** MySQL & Spring Data JPA (Hibernate)
 * **Devops:** Docker, Docker Compose, Multi-stage Docker Builds
