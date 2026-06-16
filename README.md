@@ -111,7 +111,7 @@ docker-compose up --build --detach
 docker-compose down
 ```
 
-<img width="1438" height="400" alt="image" src="https://github.com/user-attachments/assets/6834aac4-7240-4d0b-8472-89683e1fd706" />
+<img width="1877" height="582" alt="image" src="https://github.com/user-attachments/assets/b3ae1218-1878-4ad7-9369-5656afcca238" />
 
 ---
 
