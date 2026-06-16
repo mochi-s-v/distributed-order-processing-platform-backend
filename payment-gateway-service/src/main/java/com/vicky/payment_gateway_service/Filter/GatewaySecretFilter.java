@@ -14,7 +14,7 @@ import java.io.IOException;
 public class GatewaySecretFilter extends OncePerRequestFilter {
 
     @Value("${gateway.shared.secret}")
-    private String expectedSecret;
+    private String gatewaySecret;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -24,7 +24,7 @@ public class GatewaySecretFilter extends OncePerRequestFilter {
         }
         String secret = request.getHeader("X-Gateway-Secret");
 
-        if (secret == null || !secret.equals(expectedSecret)) {
+        if (secret == null || !secret.equals(gatewaySecret)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\": \"Direct access forbidden: Requests must go through the API Gateway.\"}");

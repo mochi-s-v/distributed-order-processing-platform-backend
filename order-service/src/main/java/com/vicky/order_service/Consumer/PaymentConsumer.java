@@ -17,6 +17,9 @@ public class PaymentConsumer {
     @KafkaListener(topics = "payment-events", groupId = "order-service-group")
     public void handlePaymentSuccess(PaymentSuccessEvent event) {
         // change payment status
+        System.out.println("request inside the payment consumer in order service");
+        System.out.println("changing order status");
+        System.out.println("reducing stock");
         orderService.changeOrderStatus(event.getOrderId());
         // reduce stock
         orderService.reduceStock(event.getOrderId());
