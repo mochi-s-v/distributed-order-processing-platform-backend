@@ -88,6 +88,8 @@ services:
         condition: service_healthy
       eureka-service-registry:
         condition: service_started
+      kafka:
+        condition: service_started
     networks:
       - shopping-network
 
@@ -107,6 +109,8 @@ services:
         condition: service_healthy
       eureka-service-registry:
         condition: service_started
+      kafka:
+        condition: service_started
     networks:
       - shopping-network
 
@@ -123,6 +127,41 @@ services:
     networks:
       - shopping-network
 
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CLUSTER_ID: "Mk3OEYBSD34fcwNTJENDM2Qk"
+    networks:
+      - shopping-network
+    volumes:
+      - kafka-volume:/var/lib/kafka/data
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - shopping-network
+
   user-db:
     image: mysql:latest
     container_name: shoppingMicroservice-user-db
@@ -132,7 +171,7 @@ services:
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SPRING_DATASOURCE_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${SPRING_DATASOURCE_PASSWORD}" ]
       start_period: 30s
       interval: 10s
       timeout: 5s
@@ -227,3 +266,4 @@ volumes:
   cart-db-volume:
   order-db-volume:
   payment-db-volume:
+  kafka-volume:

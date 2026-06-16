@@ -8,11 +8,14 @@ import com.vicky.user_service.Mapper.UserMapper;
 import com.vicky.user_service.Repository.UserRepository;
 import com.vicky.user_service.Service.UserService;
 import com.vicky.user_service.Utility.GetAuthenticatedUser;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -29,12 +32,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
+
         UserEntity userEntity = UserMapper.toEntity(userRequestDto);
         userEntity.setPassword(passwordEncoder.encode(userRequestDto.getPassword()));
         userEntity.setRole("USER");
         userEntity.setCreatedAt(LocalDateTime.now());
         userEntity.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(userEntity);
+        try {
+            userRepository.save(userEntity);
+        } catch (DataIntegrityViolationException dive) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User details already exists");
+        }
         return UserMapper.toDto(userEntity);
     }
 

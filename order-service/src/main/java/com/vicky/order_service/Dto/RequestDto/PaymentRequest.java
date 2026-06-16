@@ -15,4 +15,5 @@ public class PaymentRequest {
     private BigDecimal amount;
     private String currency;
     private String customerEmail;
+    private String username;
 }

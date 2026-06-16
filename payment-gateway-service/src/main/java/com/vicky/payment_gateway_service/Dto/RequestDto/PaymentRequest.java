@@ -14,4 +14,5 @@ public class PaymentRequest {
     private Long amount;
     private String currency;
     private String customerEmail;
+    private String username;
 }

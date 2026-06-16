@@ -93,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
                 .amount(amountInCents)
                 .currency("inr")
                 .customerEmail(GetAttributesFromHeader.getAuthUsername() + "@example.com")
+                .username(GetAttributesFromHeader.getAuthUsername())
                 .build();
 
         PaymentResponse paymentResponse;
@@ -102,17 +103,17 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Payment service is temporarily unavailable. Try again shortly.");
         }
 
-        List<StockDeductRequestDto> stockDeductRequests = cartDto.getItems().stream()
-                .map(item -> new StockDeductRequestDto(item.getProductId(), item.getQuantity()))
-                .collect(Collectors.toList());
+//        List<StockDeductRequestDto> stockDeductRequests = cartDto.getItems().stream()
+//                .map(item -> new StockDeductRequestDto(item.getProductId(), item.getQuantity()))
+//                .collect(Collectors.toList());
 
-        try {
-            productClient.deductStock(stockDeductRequests);
-        } catch (feign.FeignException e) {
-            throw new RuntimeException("Checkout failed: Insufficient stock or invalid item details.");
-        } catch (Exception e) {
-            throw new RuntimeException("Checkout failed: Product service is currently unreachable.");
-        }
+//        try {
+//            productClient.deductStock(stockDeductRequests);
+//        } catch (feign.FeignException e) {
+//            throw new RuntimeException("Checkout failed: Insufficient stock or invalid item details.");
+//        } catch (Exception e) {
+//            throw new RuntimeException("Checkout failed: Product service is currently unreachable.");
+//        }
 
         return paymentResponse.getPaymentSessionUrl();
     }
@@ -135,4 +136,32 @@ public class OrderServiceImpl implements OrderService {
                 .map(orderEntity -> orderMapper.toDto(orderEntity))
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public void changeOrderStatus(long orderId) {
+        OrderEntity orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        orderEntity.setOrderStatus("PAID");
+        orderRepository.save(orderEntity);
+    }
+
+    @Override
+    @Transactional
+    public void reduceStock(long orderId) {
+        OrderEntity orderEntity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        List<StockDeductRequestDto> stockDeductRequests = orderEntity.getOrderItems().stream()
+                .map(item -> new StockDeductRequestDto(item.getProductId(), item.getOrderCount()))
+                .collect(Collectors.toList());
+
+        try {
+            productClient.deductStock(stockDeductRequests);
+        } catch (feign.FeignException e) {
+            throw new RuntimeException("Checkout failed: Insufficient stock or invalid item details.");
+        } catch (Exception e) {
+            throw new RuntimeException("Checkout failed: Product service is currently unreachable.");
+        }
+    }
+
 }
