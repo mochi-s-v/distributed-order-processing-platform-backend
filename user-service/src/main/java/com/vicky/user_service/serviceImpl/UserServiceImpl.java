@@ -77,4 +77,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("username not found"));
     }
 
+    @Override
+    public String getEmail(String username) {
+        UserEntity userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("No Matching userId found"));
+        return userEntity.getEmail();
+    }
+
 }

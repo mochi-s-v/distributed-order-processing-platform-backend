@@ -36,6 +36,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .setCustomerEmail(request.getCustomerEmail())
                 .putMetadata("orderId", String.valueOf(request.getOrderId()))
                 .putMetadata("username", request.getUsername())
+                .putMetadata("email", request.getCustomerEmail())
                 .addLineItem(SessionCreateParams.LineItem.builder()
                                 .setQuantity(1L)
                                 .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
@@ -47,6 +48,7 @@ public class PaymentServiceImpl implements PaymentService {
                                                 ).build()
                                 ).build()
                 ).build();
+        System.out.println("before webhook customer email : " + request.getCustomerEmail());
         Session session = Session.create(params);
         return session.getUrl();
     }

@@ -24,10 +24,11 @@ public class JwtUtility {
         this.SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, String role, String email) {
         final long accessExpiration = 3600000;
         return Jwts.builder()
                 .claim("roles", List.of(role))
+                .claim("email", email)
                 .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessExpiration))

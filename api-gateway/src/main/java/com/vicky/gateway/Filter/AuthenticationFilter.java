@@ -50,9 +50,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                 }
                 String username = jwtUtility.extractUsername(token);
                 String rolesList = jwtUtility.extractRoles(token);
+                String email = jwtUtility.extractEmail(token);
                 ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                         .header("X-loggedIn-User", username)
                         .header("X-loggedIn-role", rolesList)
+                        .header("X-loggedIn-email", email)
                         .build();
                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
             } catch (Exception e){

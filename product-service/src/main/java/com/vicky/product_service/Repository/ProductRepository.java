@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
@@ -26,4 +27,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @Transactional
     @Query("UPDATE ProductEntity p SET p.quantity = :qty, p.updatedAt = CURRENT_TIMESTAMP WHERE p.sku = :sku")
     void restockBySku(@Param("sku") String sku, @Param("qty") int qty);
+
+    Optional<ProductEntity> findBySku(String sku);
 }

@@ -13,6 +13,7 @@
         <option value="$PROJECT_DIR$/Eureka-service-registry/pom.xml" />
         <option value="$PROJECT_DIR$/payment-gateway-service/pom.xml" />
         <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/notification-service/pom.xml" />
       </list>
     </option>
   </component>

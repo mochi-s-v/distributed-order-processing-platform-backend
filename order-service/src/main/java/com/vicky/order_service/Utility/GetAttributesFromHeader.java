@@ -32,4 +32,17 @@ public class GetAttributesFromHeader {
         }
         throw new RuntimeException("Unauthorized: No role provided in request headers.");
     }
+
+    public static String getAuthEmail() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+        if (attributes != null) {
+            HttpServletRequest request = attributes.getRequest();
+            String role = request.getHeader("X-loggedIn-email");
+            if (role != null && !role.trim().isEmpty()) {
+                return role;
+            }
+        }
+        throw new RuntimeException("Unauthorized: No role provided in request headers.");
+    }
 }

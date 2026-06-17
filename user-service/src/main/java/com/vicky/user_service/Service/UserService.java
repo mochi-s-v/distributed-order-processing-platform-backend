@@ -14,4 +14,5 @@ public interface UserService {
 
     // system
     public UserDetails loadUserByUsername(String username);
+    public String getEmail(String username);
 }

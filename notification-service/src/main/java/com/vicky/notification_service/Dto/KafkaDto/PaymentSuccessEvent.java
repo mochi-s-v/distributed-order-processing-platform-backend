@@ -1,4 +1,4 @@
-package com.vicky.payment_gateway_service.Dto.KafkaDto;
+package com.vicky.notification_service.Dto.KafkaDto;
 
 import lombok.*;
 

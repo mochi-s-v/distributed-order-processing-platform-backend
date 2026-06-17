@@ -5,13 +5,17 @@ import com.vicky.user_service.Dto.RequestDto.LoginRequestDto;
 import com.vicky.user_service.Dto.RequestDto.UserRequestDto;
 import com.vicky.user_service.Dto.ResponseDto.ApiResponse;
 import com.vicky.user_service.Dto.ResponseDto.UserResponseDto;
+import com.vicky.user_service.Entity.UserEntity;
+import com.vicky.user_service.Repository.UserRepository;
 import com.vicky.user_service.Utility.JwtUtility;
 import com.vicky.user_service.serviceImpl.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Enumeration;
@@ -33,6 +37,11 @@ public class UserController {
         this.authenticationManager = authenticationManager;
         this.jwtUtility = jwtUtility;
     }
+
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponseDto>> createUser(@RequestBody UserRequestDto userRequestDto) {
@@ -66,11 +75,12 @@ public class UserController {
                     loginRequestDto.getUsername(),
                     loginRequestDto.getPassword()
             ));
+            System.out.println("im authenticated");
             String role = authentication.getAuthorities().stream()
                     .findFirst()
                     .map(authority -> authority.getAuthority()) // <-- Explicit lambda instead of method reference
                     .orElse("ROLE_USER");
-            String jwtToken = jwtUtility.generateToken(loginRequestDto.getUsername(), role);
+            String jwtToken = jwtUtility.generateToken(loginRequestDto.getUsername(), role, userService.getEmail(loginRequestDto.getUsername()));
             String refreshToken = jwtUtility.generateRefreshToken(loginRequestDto.getUsername());
             return ResponseEntity.ok(ApiResponse
                     .success(Map.of("accessToken : ", jwtToken,
@@ -78,7 +88,9 @@ public class UserController {
                     "logged in successfully",
                     200));
         } catch (Exception e) {
-            throw new Exception("username and password doesn't match");
+            System.out.println(e.getClass().getName());
+            System.out.println(e.getMessage());
+            throw e;
         }
     }
 

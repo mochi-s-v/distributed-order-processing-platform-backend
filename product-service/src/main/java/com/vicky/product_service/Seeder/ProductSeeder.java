@@ -53,8 +53,13 @@ public class ProductSeeder implements CommandLineRunner {
                 productRepository.save(p);
                 System.out.println("Product created: " + p.getName());
             } else {
-                productRepository.restockBySku(sku, RESTOCK_QUANTITY);
-                System.out.println("Product restocked: " + sku);
+                ProductEntity product = productRepository.findBySku(sku)
+                        .orElseThrow();
+                if (product.getCategoryEntity() == null) {
+                    product.setCategoryEntity((CategoryEntity) row[4]);
+                }
+                product.setQuantity(RESTOCK_QUANTITY);
+                productRepository.save(product);
             }
         }
     }

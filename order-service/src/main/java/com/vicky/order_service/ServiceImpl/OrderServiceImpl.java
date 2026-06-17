@@ -92,7 +92,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderId(savedOrder.getId())
                 .amount(amountInCents)
                 .currency("inr")
-                .customerEmail(GetAttributesFromHeader.getAuthUsername() + "@example.com")
+                .customerEmail(GetAttributesFromHeader.getAuthEmail())
                 .username(GetAttributesFromHeader.getAuthUsername())
                 .build();
 

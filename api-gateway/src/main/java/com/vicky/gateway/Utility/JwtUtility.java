@@ -60,4 +60,13 @@ public class JwtUtility {
                 .map(obj -> obj.toString())
                 .toList());
     }
+
+    public String extractEmail(String token) {
+        Claims claims = getClaims(token);
+        String email = claims.get("email", String.class);
+        if (email == null || email.isEmpty()) {
+            return "exampleEmail@email.com";
+        }
+        return email;
+    }
 }

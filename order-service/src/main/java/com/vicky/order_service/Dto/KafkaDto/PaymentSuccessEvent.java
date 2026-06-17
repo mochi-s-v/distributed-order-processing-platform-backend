@@ -14,4 +14,5 @@ public class PaymentSuccessEvent {
     private String username;
     private BigDecimal amount;
     private String stripeSessionId;
+    private String email;
 }

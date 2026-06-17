@@ -40,15 +40,18 @@ public class StripeWebHookServiceImpl implements StripeWebHookService {
                 if (session != null) {
                     String orderId = session.getMetadata().get("orderId");
                     String username = session.getMetadata().get("username");
+                    String customerEmail1 = session.getCustomerEmail();
+                    String customerEmail2 = session.getMetadata().get("email");
                     System.out.println("received " + event.getType());
                     System.out.println("checkout completed for order: " + orderId);
-
+                    System.out.println("after webhook customer email from session : " + customerEmail1);
+                    System.out.println("after webhook customer email from metadata : " + customerEmail2);
                     kafkaTemplate.send("payment-events",
                             orderId,
                             new PaymentSuccessEvent(Long.parseLong(orderId),
                                     username,
                                     BigDecimal.valueOf(session.getAmountTotal()),
-                                    session.getId()));
+                                    session.getId(), customerEmail2));
                     System.out.println("published to kafka for order: " + orderId);
                 }
                 break;

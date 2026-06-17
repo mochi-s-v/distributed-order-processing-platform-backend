@@ -135,6 +135,25 @@ services:
     networks:
       - shopping-network
 
+  notification-service:
+    build: ./notification-service
+    container_name: shoppingMicroservice-notification-service
+    environment:
+      EUREKA_SERVER_URL: http://eureka-service-registry:8761/eureka
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+    depends_on:
+      eureka-service-registry:
+        condition: service_started
+      kafka-1:
+        condition: service_started
+      kafka-2:
+        condition: service_started
+      kafka-3:
+        condition: service_started
+    networks:
+      - shopping-network
+
   kafka-1:
     image: confluentinc/cp-kafka:latest
     container_name: kafka-1
