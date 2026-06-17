@@ -1,6 +1,22 @@
 # The E-Commerce Microservice Backend
 
-This repository tracks the version history of taking a heavy, tightly knotted monolithic app and tearing it down into lean, independent **Microservices**. 
+This repository tracks the version history of taking a heavy, tightly knotted monolithic app and tearing it down into independent, loosely coupled **microservices**. 
+
+---
+
+## Project Highlights
+
+- 6+ Spring Boot Microservices
+- API Gateway with JWT Authentication
+- Service Discovery using Eureka
+- Stripe Payment Integration
+- Stripe Webhooks
+- Apache Kafka Event Processing
+- 3-Broker Kafka Cluster with Replication
+- OpenFeign Inter-Service Communication
+- Dockerized Deployment
+- Independent Databases per Service
+- MySQL + Spring Data JPA
 
 ---
 
@@ -8,16 +24,16 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 
 ### 1. Eureka Service Registry
 * **What it does:** Operates on port `8761`. It acts as the registry for the entire system.
-* **Why it's cool:** Services don't need to know hardcoded URLs to talk to each other anymore. They register with Eureka, and look each other up dynamically.
+* **Why it matters:** Services don't need to know hardcoded URLs to talk to each other anymore. They register with Eureka, and look each other up dynamically.
 
 ### 2. Spring Cloud Gateway
 * **What it does:** Sits out front on port `8080`. Absolutely no client talks to the backend databases directly; everything flows through the Gateway.
-* **Why it's cool:** It parses incoming client JWT tokens, validates them, strips them away, and forwards the clean identity headers (`X-LoggedIn-User`, `X-LoggedIn-Role`) downstream. 
+* **Why it matters:** It parses incoming client JWT tokens, validates them, strips them away, and forwards the clean identity headers (`X-LoggedIn-User`, `X-LoggedIn-Role`) downstream. 
 
 ### 3. Anti-Spoofing Perimeter Security
 * **The Problem:** If a hacker scans the system's ports and hits a microservice directly (like hitting the Cart Service on port `8082`), they could type in fake headers like `X-LoggedIn-Role: ROLE_ADMIN` and hijack the system.
 * **The Fix:** I built a custom **Zero-Trust Shield**. The Gateway automatically injects a confidential, random `X-Gateway-Secret` string to every request. 
-* **The Result:** Every service verifies this secret first thing in a strict `GatewaySecretFilter`. If a request doesn't have the secret handshake, it gets slapped with a `401 Unauthorized` instantly. Yes, this makes the system **stateful** but in turn makes it very secure.
+* **The Result:** Every service verifies this secret first thing in a strict `GatewaySecretFilter`. If a request doesn't have the secret handshake, it gets rejected with a `401 Unauthorized` instantly. Yes, this makes the system **stateful** but in turn makes it very secure.
 
 ### 4. Decoupling by Reference
 * **The Problem:** In the monolith, `CartEntity` was tightly bound to `ProductEntity` and `UserEntity`.
@@ -42,12 +58,12 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 * **The Fix:** By taking advantage of the stripe webhook events and stripe cli. Every payment sends a response back to the system.
 * **The Result:** When ever the payment url is sent to the user, the Stripe cli waits for response and when the stripe server sends a response to the system, I check for `checkout.session.completed`, `payment_intent.payment_failed` and trigger events accordingly.
 
-### 8. Automated Stock Shrinker Logic
+### 9. Automated Stock Shrinker Logic
 * **The Problem:** Race conditions could allow multiple checkouts to over-purchase an item, dropping inventory below zero.
 * **The Fix:** I designed a high-integrity, transactional inventory deduction sequence inside the `PRODUCT-SERVICE`.
 * **The Result:** The system explicitly checks real-time available stock against incoming requested values. If the item count is sufficient, it precisely decrements the balance (safeguarding against dropping stock to 0 on small purchases). If inventory is short, an error cascades back over the network layer via Feign exception bubbles to gracefully block and roll back the entire transaction.
 
-### 9. Dockerized Infrastructure
+### 10. Dockerized Infrastructure
 * **The Problem:** Running multiple microservices and databases manually requires starting each application separately and managing networking configurations by hand.
 * **The Fix:** I Containerized every microservice using Docker and orchestrated the entire platform with Docker Compose.
 * **The Optimization:** I also Implemented multi-stage Docker builds for every service. Maven and build dependencies exist only in the temporary build stage, while the final runtime image contains only the compiled JAR and JDK runtime.
@@ -67,10 +83,20 @@ Runtime Stage
 └── Application JAR
 ```
 
-### 10. Automated Dev Data Seeding
+### 11. Automated Data Seeding
 * **The Problem:** Every fresh environment needs baseline data to be testable — an admin account, a default user, product categories, and inventory.
 * **The Fix:** I Implemented CommandLineRunner seeders across services. On every startup, the system checks and creates an admin account, a default user (jane) with an address, 3 product categories, and 5 products if they don't already exist.
 * **The Result:** A completely fresh `docker compose up` gives you a fully populated, immediately testable environment with zero manual setup. Product stock is also restocked to 10 units on every restart, making repeated checkout testing seamless without manual DB resets.
+
+### 12. Event-Driven Communication with Apache Kafka
+* **The Problem:** Critical workflows such as inventory updates and customer notifications should continue operating even if individual consumers or brokers become unavailable.
+* **The Fix:** I Implemented a 3-broker Kafka cluster with a replication factor of 3 and min.insync.replicas=2 to provide fault tolerance and durable event delivery. Separate consumer groups process inventory and notification events independently, allowing multiple downstream services to react to the same business event.
+* **The Result:** The platform remains resilient to broker failures while maintaining reliable event processing for stock management and customer communications.
+
+### 13. Notification Service
+* **The Problem:** Sending emails synchronously during checkout increases response times and tightly couples customer communication to the ordering workflow.
+* **The Fix:** Built a dedicated Notification Service that consumes Kafka events and delivers email notifications asynchronously using SMTP through Spring Mail.
+* **The Result:** Checkout requests remain fast and resilient while customer communications are processed independently in the background.
 
 ---
 
@@ -80,7 +106,63 @@ Runtime Stage
 
 ---
 
-## Pre requisites
+## Checkout Workflow
+
+```
+## Checkout & Order Processing Flow
+
+User
+│
+▼
+API Gateway
+│
+├── JWT Validation
+└── Route Request
+│
+▼
+Cart Service
+│
+└── Checkout Request
+│
+▼
+Payment Service
+│
+├── Create Stripe Checkout Session
+└── Return Payment URL
+│
+▼
+Stripe Checkout
+│
+└── Customer Completes Payment
+│
+▼
+Stripe Webhook
+│
+└── Payment Success Event
+│
+▼
+Kafka Cluster
+│
+├── 3 Brokers
+├── Replication Factor = 3
+└── Min ISR = 2
+│
+├───────────────────┬───────────────────┐
+│                   │                   │
+▼                   ▼                   ▼
+Order            Product            Notification
+Service          Service            Service
+│                   │                   │
+├── Save            ├── Reduce          └── Send
+│   Order           │   Stock               Email
+│                   │
+▼                   ▼
+──────────Order Completed──────────
+```
+
+---
+
+## Pre requisites to run the application
 
 1. Create a stripe test account
 2. Create a .env file and use the .env.example file to create environment variables
@@ -98,8 +180,11 @@ SPRING_GATEWAY_SECRET="your gateway secret key"
 
 #JWT
 JWT_SIGNIN_KEY="your jwt sign in key"
-```
 
+# Gmail
+GMAIL_APP_PASSWORD="your gmail app password"
+GMAIL_USERNAME="your gmail id"
+```
 ---
 
 ## Running with Docker
@@ -125,11 +210,10 @@ docker-compose down
 
 Here is what I'm building next to take this platform to production level:
 
-* **Apache Kafka:** Asynchronous event broker to offload heavy processing (like sending confirmation emails) to background workers.
 * **Keycloak OAuth2:** Centralized IAM replacing custom filters with industry-standard Single Sign-On (SSO) and token validation.
-* **Saga Orchestration:** Distributed transaction engine that auto-rolls back changes across services if a checkout step fails.
-* **Prometheus & Grafana:** Real-time production telemetry monitoring JVM health, response times, and system error rates.
 * **Resilience4j:** Safety nets for Feign clients. Trips open if a service fails, serving cached/fallback data instead of crashing.
+* **Prometheus & Grafana:** Real-time production telemetry monitoring JVM health, response times, and system error rates.
+* **Saga Orchestration:** Distributed transaction engine that auto-rolls back changes across services if a checkout step fails.
 
 ---
 
@@ -141,7 +225,9 @@ Here is what I'm building next to take this platform to production level:
 * **Service Discovery:** Spring Cloud Netflix Eureka
 * **API Gateway:** Spring Cloud Gateway
 * **Payment Gateway:** Stripe Payment Gateway, Stripe CLI, Stripe Webhooks
+* **Event Streaming:** Apache Kafka
+* **Email Notifications:** Spring Mail (SMTP)
 * **Inter-Service Communication:** Spring Cloud OpenFeign
 * **Database & ORM:** MySQL & Spring Data JPA (Hibernate)
-* **Devops:** Docker, Docker Compose, Multi-stage Docker Builds
+* **DevOps:** Docker, Docker Compose, Multi-stage Docker Builds
 * **Boilerplate Reduction:** Lombok
