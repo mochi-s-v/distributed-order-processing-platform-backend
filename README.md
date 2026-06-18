@@ -6,7 +6,7 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 
 ## Project Highlights
 
-- 6+ Spring Boot Microservices
+- 8 Spring Boot Microservices
 - API Gateway with JWT Authentication
 - Service Discovery using Eureka
 - Stripe Payment Integration
