@@ -225,7 +225,7 @@ Here is what I'm building next to take this platform to production level:
 * **API Gateway:** Spring Cloud Gateway
 * **Payment Gateway:** Stripe Payment Gateway, Stripe CLI, Stripe Webhooks
 * **Event Streaming:** Apache Kafka
-* **Email Notifications:** Spring Mail (SMTP)
+* **Email Notifications:** Spring Mail & SMTP
 * **Inter-Service Communication:** Spring Cloud OpenFeign
 * **Database & ORM:** MySQL & Spring Data JPA (Hibernate)
 * **DevOps:** Docker, Docker Compose, Multi-stage Docker Builds
