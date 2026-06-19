@@ -203,7 +203,7 @@ docker-compose up --build --detach
 # Stop everything
 docker-compose down
 ```
-<img width="1904" height="770" alt="Screenshot 2026-06-18 003354" src="https://github.com/user-attachments/assets/de42f8ad-9ac6-4533-84d9-aa10e0cae337" />
+<img width="1958" height="892" alt="Screenshot 2026-06-20 000941" src="https://github.com/user-attachments/assets/a1d9c68c-e94c-4b39-ab0b-e70f9e5fe92c" />
 
 ---
 
