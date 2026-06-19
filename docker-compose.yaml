@@ -336,6 +336,14 @@ services:
     networks:
       - shopping-network
 
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - shopping-network
+
   user-db:
     image: mysql:latest
     container_name: shoppingMicroservice-user-db
