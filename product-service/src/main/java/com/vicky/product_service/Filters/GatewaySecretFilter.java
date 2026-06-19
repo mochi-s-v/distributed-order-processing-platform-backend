@@ -13,10 +13,15 @@ import java.io.IOException;
 @Component
 public class GatewaySecretFilter extends OncePerRequestFilter {
 
-
-
     @Value("${gateway.shared.secret}")
     private String expectedSecret;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.equals("/actuator/health") ||
+                uri.equals("/actuator/prometheus");
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

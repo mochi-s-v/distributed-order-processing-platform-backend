@@ -17,11 +17,16 @@ public class GatewaySecretFilter extends OncePerRequestFilter {
     private String gatewaySecret;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.equals("/webhook/stripe") ||
+                uri.equals("/actuator/health") ||
+                uri.equals("/actuator/prometheus");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getRequestURI().equals("/webhook/stripe")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+
         String secret = request.getHeader("X-Gateway-Secret");
 
         if (secret == null || !secret.equals(gatewaySecret)) {
