@@ -220,7 +220,7 @@ docker-compose down
 
 | Tool       | URL                   | Purpose                                           |
 | ---------- | --------------------- | ------------------------------------------------- |
-| Kafka UI   | http://localhost:8085 | Kafka topic, broker and consumer group monitoring |
+| Kafka UI   | http://localhost:8090 | Kafka topic, broker and consumer group monitoring |
 | Prometheus | http://localhost:9090 | Metrics collection and querying                   |
 | Grafana    | http://localhost:3000 | Metrics visualization and dashboards              |
 | Zipkin     | http://localhost:9411 | Distributed tracing and request flow analysis     |
