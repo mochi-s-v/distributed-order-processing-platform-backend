@@ -78,6 +78,8 @@ services:
         condition: service_healthy
       eureka-service-registry:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - shopping-network
 
@@ -344,6 +346,40 @@ services:
     networks:
       - shopping-network
 
+  redis:
+    image: redis:8.6.4-trixie
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-volume:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shopping-network
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"
+    environment:
+      RI_ACCEPT_TERMS_AND_CONDITIONS: "true"
+      RI_REDIS_HOST: redis
+      RI_REDIS_PORT: 6379
+      RI_REDIS_ALIAS: shopping-redis
+    volumes:
+      - redis-insight-volume:/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - shopping-network
+
   user-db:
     image: mysql:latest
     container_name: shoppingMicroservice-user-db
@@ -452,3 +488,5 @@ volumes:
   kafka-2-volume:
   kafka-3-volume:
   grafana-storage:
+  redis-volume:
+  redis-insight-volume:

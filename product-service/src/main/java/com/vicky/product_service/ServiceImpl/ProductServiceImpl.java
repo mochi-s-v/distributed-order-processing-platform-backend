@@ -11,6 +11,10 @@ import com.vicky.product_service.Repository.CategoryRepository;
 import com.vicky.product_service.Repository.ProductRepository;
 import com.vicky.product_service.Service.ProductService;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -31,31 +36,48 @@ public class ProductServiceImpl implements ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    public void sleep() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
+    @Cacheable(value = "products", key = "'page:' + #page + ':size:' + #size")
     public List<ProductResponseDto> getAllProduct(int page, int size) {
+        sleep();
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductEntity> pageDetails = productRepository.findAll(pageable);
         return pageDetails.getContent().stream()
                 .map(productEntity -> ProductMapper.toDto(productEntity))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Cacheable(value = "products", key = "#id")
     public ProductResponseDto getProduct(long id) {
+        sleep();
         ProductEntity productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("product not found"));
         return ProductMapper.toDto(productEntity);
     }
 
     @Override
+    @Cacheable(value = "categoryProducts", key = "#id")
     public List<ProductResponseDto> getProductByCategory(long id) {
         List<ProductEntity> list = productRepository.getByCategoryEntity_Id(id);
         return list.stream()
                 .map(productEntity -> ProductMapper.toDto(productEntity))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "categoryProducts", allEntries = true)
+    })
     public ProductResponseDto createProduct(ProductRequestDto productRequestDto) {
         CategoryEntity categoryEntity = categoryRepository.findById(productRequestDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("category not found"));
@@ -69,6 +91,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "categoryProducts", allEntries = true)
+    })
     public ProductResponseDto updateProduct(long id, ProductRequestDto productRequestDto) {
         CategoryEntity categoryEntity = categoryRepository.findById(productRequestDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("category not found"));
@@ -86,6 +112,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "categoryProducts", allEntries = true)
+    })
     public void deleteProduct(long id) {
         ProductEntity productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("no product found"));

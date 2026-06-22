@@ -5,6 +5,7 @@ import com.vicky.product_service.Dto.RequestDto.CategoryRequestDto;
 import com.vicky.product_service.Dto.ResponseDto.ApiResponse;
 import com.vicky.product_service.Dto.ResponseDto.CategoryResponseDto;
 import com.vicky.product_service.Service.CategoryService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
