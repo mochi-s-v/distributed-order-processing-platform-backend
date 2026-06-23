@@ -8,6 +8,9 @@ import com.vicky.user_service.Mapper.UserMapper;
 import com.vicky.user_service.Repository.UserRepository;
 import com.vicky.user_service.Service.UserService;
 import com.vicky.user_service.Utility.GetAuthenticatedUser;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -47,6 +50,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "T(com.vicky.user_service.Utility.GetAuthenticatedUser).getAuthUsername()")
     public UserResponseDto updateUser(UserRequestDto userRequestDto) {
         UserEntity userEntity = userRepository.findByUsername(GetAuthenticatedUser.getAuthUsername())
                 .orElseThrow(() -> new RuntimeException("User name not found"));
@@ -58,6 +62,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @CacheEvict(value = "users", key = "T(com.vicky.user_service.Utility.GetAuthenticatedUser).getAuthUsername()")
     public void deleteUser() {
         UserEntity userEntity = userRepository.findByUsername(GetAuthenticatedUser.getAuthUsername())
                 .orElseThrow(() -> new RuntimeException("No Matching userId found"));
@@ -65,6 +70,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Cacheable(value = "users", key = "T(com.vicky.user_service.Utility.GetAuthenticatedUser).getAuthUsername()")
     public UserResponseDto getUser() {
         UserEntity userEntity = userRepository.findByUsername(GetAuthenticatedUser.getAuthUsername())
                 .orElseThrow(() -> new RuntimeException("No Matching userId found"));

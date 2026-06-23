@@ -108,13 +108,11 @@ public class UserController {
     @GetMapping("/debug-headers")
     public ResponseEntity<Map<String, String>> debugHeaders(HttpServletRequest request) {
         Map<String, String> headers = new HashMap<>();
-
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
             headers.put(headerName, request.getHeader(headerName));
         }
-
         return ResponseEntity.ok(headers);
     }
 }
