@@ -113,6 +113,21 @@ Runtime Stage
 * **The Fix:** Integrated Redis as a distributed caching layer. Frequently accessed product data is cached and invalidated whenever updates occur. Redis Insight was added for cache monitoring and key inspection.
 * **The Result:** Significantly reduced database reads and improved API response times for repeated requests, lowering average response latency from ~120ms to ~10ms for cached queries.
 
+<table>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/8fce6cab-fb08-468d-8bb8-583c08e9a485" width="450"/>
+    </td>
+    <td align="center">
+      <img src="https://github.com/user-attachments/assets/7a498e29-d494-4f0f-a5d0-be4b21e77361" width="450"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>Without Cache (> 120ms)</b></td>
+    <td align="center"><b>With Cache (< 20ms)</b></td>
+  </tr>
+</table>
+
 ---
 
 ## The Blueprint
@@ -210,7 +225,7 @@ docker-compose up --build --detach
 # Stop everything
 docker-compose down
 ```
-<img width="1958" height="892" alt="Screenshot 2026-06-20 000941" src="https://github.com/user-attachments/assets/a1d9c68c-e94c-4b39-ab0b-e70f9e5fe92c" />
+<img width="1911" height="1221" alt="image" src="https://github.com/user-attachments/assets/25b97995-1594-4c49-ac9d-4f6defe94733" />
 
 ---
 
