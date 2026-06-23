@@ -20,6 +20,8 @@ This repository tracks the version history of taking a heavy, tightly knotted mo
 - Prometheus Metrics Collection
 - Grafana Monitoring Dashboards
 - Distributed Tracing with Zipkin
+- Redis Distributed Caching
+- Redis Insight Cache Monitoring
 
 ---
 
@@ -105,6 +107,11 @@ Runtime Stage
 * **The Problem:** As the number of services grows, debugging failures and understanding request flow across service boundaries becomes increasingly difficult.
 * **The Fix:** Integrated Prometheus for metrics collection, Grafana for visualization, and Zipkin for distributed tracing across all microservices. Micrometer helps trace request between services and Kafka-driven workflows.
 * **The Result:** End-to-end request visibility, centralized monitoring dashboards, JVM metrics, service health tracking, and trace-based debugging across the platform.
+
+### 15. Redis Caching
+* **The Problem:** Frequently requested product and category data was repeatedly fetched from MySQL, increasing response times and unnecessary database load.
+* **The Fix:** Integrated Redis as a distributed caching layer. Frequently accessed product data is cached and invalidated whenever updates occur. Redis Insight was added for cache monitoring and key inspection.
+* **The Result:** Significantly reduced database reads and improved API response times for repeated requests, lowering average response latency from ~120ms to ~10ms for cached queries.
 
 ---
 
@@ -218,12 +225,13 @@ docker-compose down
 
 ### Observability Stack
 
-| Tool       | URL                   | Purpose                                           |
-| ---------- | --------------------- | ------------------------------------------------- |
-| Kafka UI   | http://localhost:8090 | Kafka topic, broker and consumer group monitoring |
-| Prometheus | http://localhost:9090 | Metrics collection and querying                   |
-| Grafana    | http://localhost:3000 | Metrics visualization and dashboards              |
-| Zipkin     | http://localhost:9411 | Distributed tracing and request flow analysis     |
+| Tool          | URL                   | Purpose                                           |
+|---------------|-----------------------|:--------------------------------------------------|
+| Kafka UI      | http://localhost:8090 | Kafka topic, broker and consumer group monitoring |
+| Prometheus    | http://localhost:9090 | Metrics collection and querying                   |
+| Grafana       | http://localhost:3000 | Metrics visualization and dashboards              |
+| Zipkin        | http://localhost:9411 | Distributed tracing and request flow analysis     |
+| Redis-Insight | http://localhost:5540 | Redis cache visualization and management          |
 
 ### Default Grafana Credentials
 
@@ -258,6 +266,8 @@ Here is what I'm building next to take this platform to production level:
 * **Service Discovery:** Spring Cloud Netflix Eureka
 * **API Gateway:** Spring Cloud Gateway
 * **Payment Gateway:** Stripe Payment Gateway, Stripe CLI, Stripe Webhooks
+* **Caching:** Redis
+* **Cache Monitoring:** Redis Insight
 * **Event Streaming:** Apache Kafka
 * **Email Notifications:** Spring Mail & SMTP
 * **Inter-Service Communication:** Spring Cloud OpenFeign
