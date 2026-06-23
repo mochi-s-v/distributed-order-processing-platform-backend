@@ -125,7 +125,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "products", allEntries = true),
+            @CacheEvict(value = "categoryProducts", allEntries = true)
+    })
     public void deduceQuantity(List<StockDeductRequestDto> stockDeductRequestDtoList) {
+
         stockDeductRequestDtoList.forEach(
                 request -> {
                     ProductEntity productEntity = productRepository.findById(request.getProductId())
@@ -135,7 +140,8 @@ public class ProductServiceImpl implements ProductService {
                         throw new RuntimeException("Insufficient stock for product: " + productEntity.getName());
                     }
                     System.out.println("im in deduce quantity service impl");
-
+                    System.out.println("im in deduce quantity service impl");
+                    System.out.println("setting quantity to: " + (productEntity.getQuantity() - request.getQuantity()));
                     productEntity.setQuantity(productEntity.getQuantity() - request.getQuantity());
                     productRepository.save(productEntity);
                 });

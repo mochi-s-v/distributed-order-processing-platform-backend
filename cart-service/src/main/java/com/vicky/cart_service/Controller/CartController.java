@@ -49,4 +49,10 @@ public class CartController {
         CartResponseDto result = cartService.updateItemQuantity(productId, quantity);
         return ResponseEntity.ok(ApiResponse.success(result, "Quantity updated", 200));
     }
+
+    @DeleteMapping("/internal/clear")
+    public ApiResponse<Void> clearCartInternal(@RequestParam String username) {
+        cartService.clearCartInternal(username);
+        return ApiResponse.success(null, "Cart cleared successfully", 200);
+    }
 }

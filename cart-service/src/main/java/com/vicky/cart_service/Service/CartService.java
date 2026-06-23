@@ -10,4 +10,5 @@ public interface CartService {
     CartResponseDto getCart();
     CartResponseDto removeItemFromCart(long productId);
     void clearCart();
+    void clearCartInternal(String username);
 }

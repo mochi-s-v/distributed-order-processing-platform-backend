@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/prometheus").permitAll()
+                        .requestMatchers("/api/cart/internal/**").permitAll()
                         .anyRequest().authenticated());
         httpSecurity.addFilterBefore(gatewaySecretFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterAfter(gatewayHeaderFilter, GatewaySecretFilter.class);

@@ -17,6 +17,7 @@ import com.vicky.order_service.Repository.OrderRepository;
 import com.vicky.order_service.Service.OrderService;
 import com.vicky.order_service.Utility.GetAttributesFromHeader;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -103,18 +105,6 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Payment service is temporarily unavailable. Try again shortly.");
         }
 
-//        List<StockDeductRequestDto> stockDeductRequests = cartDto.getItems().stream()
-//                .map(item -> new StockDeductRequestDto(item.getProductId(), item.getQuantity()))
-//                .collect(Collectors.toList());
-
-//        try {
-//            productClient.deductStock(stockDeductRequests);
-//        } catch (feign.FeignException e) {
-//            throw new RuntimeException("Checkout failed: Insufficient stock or invalid item details.");
-//        } catch (Exception e) {
-//            throw new RuntimeException("Checkout failed: Product service is currently unreachable.");
-//        }
-
         return paymentResponse.getPaymentSessionUrl();
     }
 
@@ -154,7 +144,6 @@ public class OrderServiceImpl implements OrderService {
         List<StockDeductRequestDto> stockDeductRequests = orderEntity.getOrderItems().stream()
                 .map(item -> new StockDeductRequestDto(item.getProductId(), item.getOrderCount()))
                 .collect(Collectors.toList());
-
         try {
             productClient.deductStock(stockDeductRequests);
         } catch (feign.FeignException e) {
@@ -164,4 +153,38 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+//    @Override
+//    @Transactional
+//    public void reduceStock(long orderId) {
+//        OrderEntity orderEntity = orderRepository.findById(orderId)
+//                .orElseThrow(() -> new RuntimeException("Order not found"));
+//
+//        log.info("Reducing stock for orderId: {}, items: {}", orderId, orderEntity.getOrderItems().size());
+//
+//        List<StockDeductRequestDto> stockDeductRequests = orderEntity.getOrderItems().stream()
+//                .map(item -> {
+//                    log.info("  productId: {}, qty: {}", item.getProductId(), item.getOrderCount());
+//                    return new StockDeductRequestDto(item.getProductId(), item.getOrderCount());
+//                })
+//                .collect(Collectors.toList());
+//        try {
+//            productClient.deductStock(stockDeductRequests);
+//            log.info("Stock deduction Feign call succeeded");
+//        } catch (feign.FeignException e) {
+//            log.error("FeignException during stock deduct: {}", e.getMessage());
+//            throw new RuntimeException("Checkout failed: Insufficient stock or invalid item details.");
+//        } catch (Exception e) {
+//            log.error("Exception during stock deduct: {}", e.getMessage());
+//            throw new RuntimeException("Checkout failed: Product service is currently unreachable.");
+//        }
+//    }
+
+    public void clearCart(String username) {
+        try {
+            log.info("clearing cart");
+            cartClient.clearCartInternal(username);
+        } catch (Exception e) {
+            log.warn("Failed to clear cart for {}: {}", username, e.getMessage());
+        }
+    }
 }

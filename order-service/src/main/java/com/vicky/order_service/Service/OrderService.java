@@ -11,4 +11,5 @@ public interface OrderService {
     List<OrderResponseDto> getAllOrdersByUserId();
     void changeOrderStatus(long orderId);
     void reduceStock(long orderId);
+    void clearCart(String username);
 }
